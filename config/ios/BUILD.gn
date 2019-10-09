@@ -22,6 +22,10 @@ declare_args() {
   # That is not a limitation for now as Xcode mandates the presence of bitcode
   # only when building bitcode-enabled projects for real devices (ARM CPUs).
   enable_ios_bitcode = false
+
+  # Version of the ARM64 processor when compiling on ARM64. Ignored on
+  # non-ARM64 platforms.
+  arm64_version = 80
 }
 
 # This is included by reference in the //build/config/compiler config that
@@ -47,10 +51,17 @@ config("compiler") {
       "armv7",
     ]
   } else if (current_cpu == "arm64") {
-    common_ios_flags += [
-      "-arch",
-      "arm64",
-    ]
+    if (arm64_version >= 83) {
+      common_ios_flags += [
+        "-arch",
+        "arm64e",
+      ]
+    } else {
+      common_ios_flags += [
+        "-arch",
+        "arm64",
+      ]
+    }
   }
 
   # This is here so that all files get recompiled after an Xcode update.
